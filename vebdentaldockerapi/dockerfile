@@ -1,0 +1,4 @@
+FROM java:8
+EXPOSE 7070
+ADD /target/vebdentaldockerapi-0.0.1-SNAPSHOT.jar vebdentaldockerapi-0.0.1-SNAPSHOT.jar
+ENTRYPOINT ["java","-jar","vebdentaldockerapi-0.0.1-SNAPSHOT.jar"]
