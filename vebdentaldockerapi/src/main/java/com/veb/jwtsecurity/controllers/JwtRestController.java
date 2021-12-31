@@ -10,11 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.veb.jwtsecurity.configurations.JwtUtil;
 import com.veb.jwtsecurity.exceptions.DisabledUserException;
 import com.veb.jwtsecurity.exceptions.InvalidUserCredentialsException;
 import com.veb.jwtsecurity.models.Appointment;
@@ -60,8 +53,6 @@ import net.minidev.json.parser.ParseException;
 @RestController
 public class JwtRestController {
 
-	@Autowired
-	private JwtUtil jwtUtil;
 
 	@Autowired
 	private UserAuthService userAuthService;
@@ -75,8 +66,7 @@ public class JwtRestController {
 	private AppointmentService appointmentService;
 	@Autowired
 	private PatientAppointmentService patientAppointmentService;
-	@Autowired
-	private AuthenticationManager authenticationManager;
+	
 	@Autowired
 	private DiagnosisService diagnosisService;
 	@Autowired
@@ -90,31 +80,11 @@ public class JwtRestController {
 	@PostMapping("/signin")	
 	public ResponseEntity<?> generateJwtToken(@RequestBody JwtRequest jwtRequest) {
 		
-		System.out.println(jwtRequest.getUserName()+""+jwtRequest.getUserPwd());
-		try {
-			authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(jwtRequest.getUserName(), jwtRequest.getUserPwd()));
-		} catch (DisabledException e) {
-			throw new DisabledUserException("User Inactive");
-		} catch (BadCredentialsException e) {
-			throw new InvalidUserCredentialsException("Invalid Credentials");
-		}
-		UserDetails userDetails = userAuthService.loadUserByUsername(jwtRequest.getUserName());
-		String username = userDetails.getUsername();
-		String userpwd = userDetails.getPassword();
-		List<String> roles = userDetails.getAuthorities().stream().map(r -> r.getAuthority())
-				.collect(Collectors.toList());
+		User user=userAuthService.loadUserByUsername(jwtRequest.getUserName());		
 		
 		
-		User user = new User();
-		user.setUserName(username);
-		user.setPassword(userpwd);
-		List<Role> roleList = new ArrayList(roles);
-		user.setRoles(roleList);
-		System.out.print(roleList.get(0));
-		String token = jwtUtil.generateToken(user);
 		JSONObject jsonObject=new JSONObject();
-		jsonObject.put("token", token);
+		
 		jsonObject.put("roles", user.getRoles());
 		
 		return ResponseEntity.status(HttpStatus.ACCEPTED).body(jsonObject);
@@ -123,9 +93,7 @@ public class JwtRestController {
 	@CrossOrigin("*")
 	@PostMapping("/signup")
 	public ResponseEntity<?> signup(@RequestBody User user) {
-		System.out.print(user.getUserName());
-		System.out.print(user.getPassword());
-		System.out.print(user.getRoles());
+		
 		User userObj = userAuthService.getUserByUsername(user.getUserName());
 
 		if (userObj == null) {

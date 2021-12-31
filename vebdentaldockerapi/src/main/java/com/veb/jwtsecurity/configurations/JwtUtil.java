@@ -1,5 +1,5 @@
 package com.veb.jwtsecurity.configurations;
-
+/*
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -83,3 +83,4 @@ public class JwtUtil {
 	}
 
 }
+*/

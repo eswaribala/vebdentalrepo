@@ -3,7 +3,7 @@ package com.veb.jwtsecurity.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
 import com.veb.jwtsecurity.models.Role;
@@ -14,13 +14,12 @@ import com.veb.jwtsecurity.repositories.UserRepository;
 public class UserService {
     @Autowired
 	private UserRepository userRepository;
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+
 
 	public User saveUser(User user)
 	{
 		System.out.println(user.getPassword());
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setPassword(user.getPassword());
 		return this.userRepository.save(user);
 		
 	}
